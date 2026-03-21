@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Coffee } from "lucide-react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRouter } from "next/navigation";
 
 function toTitleCase(name: string) {
   return name
@@ -100,6 +101,7 @@ export default function Header({
   userImage = null,
 }: HeaderProps) {
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
   return (
     <header
       className={`sticky top-0 z-50 shadow-[0_4px_6px_-4px_rgba(0,0,0,1)] bg-brown-primary ${className}`}
@@ -135,11 +137,20 @@ export default function Header({
 
         {showUserDropdown && (
           <div className="relative" onMouseLeave={() => setDropdownOpen(false)}>
-            <AccountTrigger
-              userName={userName}
-              userImage={userImage}
-              onMouseEnter={() => setDropdownOpen(true)}
-            />
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={() => router.push("/getCoffee")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") router.push("/getCoffee");
+              }}
+            >
+              <AccountTrigger
+                userName={userName}
+                userImage={userImage}
+                onMouseEnter={() => setDropdownOpen(true)}
+              />
+            </div>
 
             <AnimatePresence>
               {isDropdownOpen && (

@@ -24,7 +24,10 @@ export const authComponent = createClient<DataModel, typeof schema>(
  */
 export const createAuthOptions = (ctx: GenericCtx<DataModel>) => ({
   appName: "My App",
-  baseURL: process.env.BETTER_AUTH_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "",
+  baseURL:
+    process.env.BETTER_AUTH_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ??
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : ""),
   secret: process.env.BETTER_AUTH_SECRET ?? "",
   database: authComponent.adapter(ctx),
   emailAndPassword: {

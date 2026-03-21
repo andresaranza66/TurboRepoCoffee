@@ -1,33 +1,40 @@
 "use client";
 
 import { useApp } from "@/app/providers";
+import { useRouter } from "next/navigation";
 
-function formatElapsed(ms: number) {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const days = Math.floor(totalSeconds / 86400);
-  const hours = Math.floor((totalSeconds % 86400) / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
+function formatSubscribedText(subDate: number) {
+  const diffMs = Date.now() - subDate;
+  const totalDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
 
-  if (days > 0) return `${days}d ${hours}h`;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
+  if (totalDays <= 0) return "Just subscribed";
+  if (totalDays < 30) return `${totalDays}d subscribed`;
+
+  const months = Math.max(1, Math.floor(totalDays / 30));
+  return `${months}mo subscribed`;
 }
 
 export default function UserStatsPanel() {
   const { isLoading, isAuthenticated, name, email, image, drinksCount, subDate } =
     useApp();
+  const router = useRouter();
 
   if (!isAuthenticated) return null;
 
   const subscribedText =
     subDate != null
-      ? formatElapsed(Date.now() - subDate) + " subscribed"
+      ? formatSubscribedText(subDate)
       : "Not subscribed";
 
   return (
     <aside className="w-full m:w-[320px] rounded-2xl border border-white/30 bg-white/15 backdrop-blur-md shadow-lg p-4 flex flex-col">
       <div className="flex items-center gap-3">
-        <span className="h-20 w-20 rounded-full overflow-hidden bg-white/40 shrink-0">
+        <button
+          type="button"
+          onClick={() => router.push("/getCoffee")}
+          className="h-20 w-20 rounded-full overflow-hidden bg-white/40 shrink-0 cursor-pointer"
+          aria-label="Go to Get Coffee"
+        >
           {image ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -41,7 +48,7 @@ export default function UserStatsPanel() {
               {(name?.trim()?.[0] ?? "U").toUpperCase()}
             </span>
           )}
-        </span>
+        </button>
 
         <div className="min-w-0">
           <div className="text-sm font-semibold text-white truncate">
