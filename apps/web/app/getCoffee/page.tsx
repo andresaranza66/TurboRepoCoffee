@@ -8,6 +8,7 @@ import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import Link from "next/link";
 
 export default function Page() {
   const { isLoading, isAuthenticated, coffeeName, drinksCount, subDate } =
@@ -83,14 +84,15 @@ export default function Page() {
                       Show your QR code in the dispensary to get your daily coffee.
                     </div>
                   </div>
-                  <button
+                  <Link
+                  href="/account/dispensary"
                     type="button"
                     // onClick={() => drinkCoffee()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-brown-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brown-secondary transition-colors"
+                    className="inline-flex items-center gap-2 rounded-xl bg-brown-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brown-secondary transition-colors hover:cursor-pointer hover:bg-brown-secundary"
                   >
                     <CoffeeIcon className="h-4 w-4" />
                     Drink Coffee
-                  </button>
+                  </Link>
                 </div>
               </div>
             ) : (
