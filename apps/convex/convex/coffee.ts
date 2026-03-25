@@ -66,6 +66,86 @@ export const getMenu = query({
   },
 });
 
+export const getRecentDrinks = query({
+  args: { limit: v.optional(v.number()) },
+  handler: async (ctx, { limit }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) return [];
+
+    const take = Math.max(1, Math.min(limit ?? 3, 10));
+
+    // Scan more than `take` so we can skip duplicates and still return `take` unique coffees.
+    const scan = Math.max(take * 10, 30);
+
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_user_date", (q) => q.eq("userId", identity.subject))
+      .order("desc")
+      .take(scan);
+
+    const seenCoffeeIds = new Set<string>();
+    const result: {
+      orderId: string;
+      createdAt: number;
+      coffee: { id: any; name: string; image?: string } | null;
+    }[] = [];
+
+    for (const order of orders) {
+      const coffeeIdStr = order.coffeeId.toString();
+      if (seenCoffeeIds.has(coffeeIdStr)) continue;
+
+      const coffee = await ctx.db.get(order.coffeeId);
+      seenCoffeeIds.add(coffeeIdStr);
+
+      result.push({
+        orderId: order._id,
+        createdAt: order.createdAt,
+        coffee: coffee
+          ? {
+              id: coffee._id,
+              name: coffee.name,
+              image: coffee.image,
+            }
+          : null,
+      });
+
+      if (result.length >= take) break;
+    }
+
+    return result;
+  },
+});
+
+export const getMenuByPreference = query({
+  args: { maxOrdersToScan: v.optional(v.number()) },
+  handler: async (ctx, { maxOrdersToScan }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    const coffees = await ctx.db.query("coffees").collect();
+    if (!identity) return coffees;
+
+    const take = Math.max(1, Math.min(maxOrdersToScan ?? 1000, 5000));
+
+    const orders = await ctx.db
+      .query("orders")
+      .withIndex("by_user_date", (q) => q.eq("userId", identity.subject))
+      .order("desc")
+      .take(take);
+
+    const counts = new Map<string, number>();
+    for (const order of orders) {
+      const key = order.coffeeId.toString();
+      counts.set(key, (counts.get(key) ?? 0) + 1);
+    }
+
+    return coffees.sort((a, b) => {
+      const countA = counts.get(a._id.toString()) ?? 0;
+      const countB = counts.get(b._id.toString()) ?? 0;
+      if (countA !== countB) return countB - countA;
+      return a.name.localeCompare(b.name);
+    });
+  },
+});
+
 // This line is going to be for the part that peoople mutate the state of the
 
 export const orderCoffee = mutation({
@@ -128,6 +208,13 @@ export const orderCoffee = mutation({
       drinksCount: newCount,
       drinksMonth,
       updatedAt: Date.now(),
+    });
+
+    await ctx.db.insert("orders", {
+      userId: identity.subject,
+      coffeeId,
+      type: "drink",
+      createdAt: Date.now(),
     });
 
     return { success: true };

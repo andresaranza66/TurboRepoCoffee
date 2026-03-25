@@ -3,7 +3,7 @@
 import { useApp } from "../providers";
 import Header from "../_components/Header";
 import { CoffeeIcon } from "lucide-react";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -14,6 +14,7 @@ export default function Page() {
   const { isLoading, isAuthenticated, coffeeName, drinksCount, subDate } =
     useApp();
   const createSubscription = useMutation(api.user.createSubscription);
+  const recentDrinks = useQuery(api.coffee.getRecentDrinks, { limit: 3 });
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
 
@@ -28,6 +29,8 @@ export default function Page() {
   }, [isLoading, isAuthenticated, router]);
 
   if (!isAuthenticated) return null;
+
+  const lastDrinkName = recentDrinks?.[0]?.coffee?.name ?? null;
 
   return (
     <main className="min-h-screen bg-amber-50">
@@ -55,7 +58,7 @@ export default function Page() {
             <div className="rounded-2xl border border-black/5 bg-white p-4">
               <div className="text-xs font-medium text-zinc-500">Coffee</div>
               <div className="mt-1 text-lg font-semibold text-zinc-900">
-                {coffeeName ?? "—"}
+                {lastDrinkName ?? coffeeName ?? "—"}
               </div>
             </div>
             <div className="rounded-2xl border border-black/5 bg-white p-4">
@@ -75,7 +78,7 @@ export default function Page() {
           <div className="mt-6">
             {coffeeName ? (
               <div className="rounded-2xl bg-brown-primary/5 border border-brown-primary/15 p-4">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-brown-primary">
                       Subscription active
@@ -83,12 +86,28 @@ export default function Page() {
                     <div className="text-xs text-zinc-600 mt-1">
                       Show your QR code in the dispensary to get your daily coffee.
                     </div>
+
+                    <div className="mt-4">
+                      <div className="text-xs font-medium text-zinc-600">Recent drinks</div>
+                      <div className="mt-2 flex flex-col gap-1">
+                        {(recentDrinks ?? []).length > 0 ? (
+                          (recentDrinks ?? []).map((d) => (
+                            <div
+                              key={d.orderId}
+                              className="text-sm text-zinc-900"
+                            >
+                              {d.coffee?.name ?? "Unknown coffee"}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-sm text-zinc-600">No drinks yet</div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                   <Link
-                  href="/account/dispensary"
-                    type="button"
-                    // onClick={() => drinkCoffee()}
-                    className="inline-flex items-center gap-2 rounded-xl bg-brown-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brown-secondary transition-colors hover:cursor-pointer hover:bg-brown-secundary"
+                    href="/account/dispensary"
+                    className="inline-flex items-center gap-2 rounded-xl bg-brown-primary px-4 py-2 text-sm font-semibold text-white hover:bg-brown-secondary transition-colors cursor-pointer"
                   >
                     <CoffeeIcon className="h-4 w-4" />
                     Drink Coffee

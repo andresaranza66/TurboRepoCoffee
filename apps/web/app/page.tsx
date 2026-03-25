@@ -11,7 +11,7 @@ export default async function Home() {
     <>
       <AuthAwareHeader />
       <main className="relative min-h-screen">
-        <section className="relative h-200 w-full flex flex-col justify-start items-start px-12 pt-20 overflow-hidden">
+        <section className="relative w-full flex flex-col justify-start items-start px-4 sm:px-12 pt-12 sm:pt-20 pb-10 lg:pb-0 lg:h-200 overflow-visible lg:overflow-hidden">
           <div className="absolute inset-0 bg-[url('/coffeeImg1.png')] bg-cover bg-center blur-sm scale-105" />
           <div className="absolute inset-0 bg-gray-400/50" />
           <div className="relative z-10 w-full flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8">
@@ -51,7 +51,7 @@ export default async function Home() {
               </div>
             </div>
 
-            <div className="lg:pt-3 lg:shrink-0">
+            <div className="sm:pt-3 shrink-0">
               <UserStatsPanel />
             </div>
           </div>

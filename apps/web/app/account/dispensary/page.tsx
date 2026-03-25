@@ -207,7 +207,7 @@ export default function DispensaryPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={() => setConfirmCoffee(null)}
-                      className="flex-1 py-3 rounded-xl bg-zinc-200 text-zinc-800 font-semibold hover:bg-zinc-300 transition"
+                      className="flex-1 py-3 rounded-xl bg-zinc-200 text-zinc-800 font-semibold hover:bg-zinc-300 transition hover:cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -219,7 +219,7 @@ export default function DispensaryPage() {
                         }
                         setConfirmCoffee(null);
                       }}
-                      className="flex-1 py-3 rounded-xl bg-amber-600 text-white font-semibold hover:bg-amber-500 transition"
+                      className="flex-1 py-3 rounded-xl bg-amber-600 text-white font-semibold hover:bg-amber-500 transition hover:cursor-pointer"
                     >
                       Confirm Order
                     </button>
