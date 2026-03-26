@@ -3,18 +3,35 @@
 import { useApp } from "../providers";
 import Header from "../_components/Header";
 import { CoffeeIcon } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 
+function RecentDrinksList() {
+  const recentDrinks = useQuery(api.coffee.getRecentDrinks, { limit: 3 });
+
+  return (
+    <div className="mt-2 flex flex-col gap-1">
+      {(recentDrinks ?? []).length > 0 ? (
+        (recentDrinks ?? []).map((d) => (
+          <div key={d.orderId} className="text-sm text-zinc-900">
+            {d.coffee?.name ?? "Unknown coffee"}
+          </div>
+        ))
+      ) : (
+        <div className="text-sm text-zinc-600">No drinks yet</div>
+      )}
+    </div>
+  );
+}
+
 export default function Page() {
   const { isLoading, isAuthenticated, coffeeName, drinksCount, subDate } =
     useApp();
   const createSubscription = useMutation(api.user.createSubscription);
-  const recentDrinks = useQuery(api.coffee.getRecentDrinks, { limit: 3 });
   const router = useRouter();
   const [isCreating, setIsCreating] = useState(false);
 
@@ -29,8 +46,6 @@ export default function Page() {
   }, [isLoading, isAuthenticated, router]);
 
   if (!isAuthenticated) return null;
-
-  const lastDrinkName = recentDrinks?.[0]?.coffee?.name ?? null;
 
   return (
     <main className="min-h-screen bg-amber-50">
@@ -58,7 +73,7 @@ export default function Page() {
             <div className="rounded-2xl border border-black/5 bg-white p-4">
               <div className="text-xs font-medium text-zinc-500">Coffee</div>
               <div className="mt-1 text-lg font-semibold text-zinc-900">
-                {lastDrinkName ?? coffeeName ?? "—"}
+                {coffeeName ?? "—"}
               </div>
             </div>
             <div className="rounded-2xl border border-black/5 bg-white p-4">
@@ -89,20 +104,7 @@ export default function Page() {
 
                     <div className="mt-4">
                       <div className="text-xs font-medium text-zinc-600">Recent drinks</div>
-                      <div className="mt-2 flex flex-col gap-1">
-                        {(recentDrinks ?? []).length > 0 ? (
-                          (recentDrinks ?? []).map((d) => (
-                            <div
-                              key={d.orderId}
-                              className="text-sm text-zinc-900"
-                            >
-                              {d.coffee?.name ?? "Unknown coffee"}
-                            </div>
-                          ))
-                        ) : (
-                          <div className="text-sm text-zinc-600">No drinks yet</div>
-                        )}
-                      </div>
+                      <RecentDrinksList />
                     </div>
                   </div>
                   <Link
