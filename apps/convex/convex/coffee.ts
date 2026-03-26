@@ -91,15 +91,27 @@ export const getRecentDrinks = query({
     }[] = [];
 
     for (const order of orders) {
-      const coffeeIdStr = order.coffeeId.toString();
+      if (!order.coffeeId) continue;
+
+      let coffeeIdStr: string;
+      try {
+        coffeeIdStr = order.coffeeId.toString();
+      } catch {
+        continue;
+      }
       if (seenCoffeeIds.has(coffeeIdStr)) continue;
 
-      const coffee = await ctx.db.get(order.coffeeId);
+      let coffee: any | null = null;
+      try {
+        coffee = await ctx.db.get(order.coffeeId);
+      } catch {
+        continue;
+      }
       seenCoffeeIds.add(coffeeIdStr);
 
       result.push({
         orderId: order._id,
-        createdAt: order.createdAt,
+        createdAt: order.createdAt ?? 0,
         coffee: coffee
           ? {
               id: coffee._id,
