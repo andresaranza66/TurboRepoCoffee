@@ -34,7 +34,6 @@ export default function DispensaryPage() {
 
   const orderFree = useMutation(api.drinks.consumeFreeDailyDrink);
   const buyPaid = useMutation(api.drinks.buyDrink);
-  const addDrink = useMutation(api.user.addDrink);
 
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
@@ -56,7 +55,6 @@ export default function DispensaryPage() {
 
       if (drinkStatus.canDrink) {
         await orderFree({ coffeeId });
-        await addDrink({});
 
         // Beautiful Success Toast for Free Coffee
         toast.success("¡Disfruta tu café!", {
@@ -64,7 +62,6 @@ export default function DispensaryPage() {
         });
       } else {
         await buyPaid({ coffeeId });
-        await addDrink({});
 
         // Find the coffee price to show in toast (optional)
         const coffee = coffees?.find((c) => c._id === coffeeId);
