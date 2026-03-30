@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client"; // Import auth
+import Footer from "@/app/_components/Footer";
 
 type CoffeeType = {
   _id: Id<"coffees">;
@@ -140,15 +141,15 @@ export default function DispensaryPage() {
               {/* Content Container: The padding stays here */}
               <div className="p-6 flex flex-col ">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-bold text-zinc-800">
+                  <h3 className="text-base sm:text-xl font-bold text-zinc-800">
                     {coffee.name}
                   </h3>
-                  <span className="text-xl font-black text-amber-900">
+                  <span className="text-base sm:text-xl font-black text-amber-900">
                     ${coffee.price}
                   </span>
                 </div>
 
-                <p className="text-zinc-500 text-sm mb-6 line-clamp-2">
+                <p className="text-zinc-500 text-sm sm:text-base mb-6 line-clamp-2">
                   {coffee.description}
                 </p>
 
@@ -156,14 +157,14 @@ export default function DispensaryPage() {
                   <button
                     onClick={() => setConfirmCoffee(coffee._id)}
                     disabled={coffee.stock === 0 || loadingId === coffee._id}
-                    className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold transition-all hover:cursor-pointer ${
+                    className={`w-full flex items-center justify-center gap-2 sm:px-4 sm:py-3 py-2 px-2 rounded-xl font-bold text-sm sm:text-base transition-all hover:cursor-pointer ${
                       drinkStatus.canDrink
                         ? "bg-amber-600 text-white hover:bg-amber-500 active:scale-95"
                         : "bg-zinc-900 text-white hover:bg-zinc-800 active:scale-95"
                     } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     {loadingId === coffee._id ? (
-                      <div className="h-5 w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="h-2 w-2 sm:h-5 sm:w-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : drinkStatus.canDrink ? (
                       <>Claim Free Coffee</>
                     ) : (
@@ -197,7 +198,7 @@ export default function DispensaryPage() {
                     ${selectedCoffee.price}
                   </p>
 
-                  <p className="text-zinc-500 mb-6">
+                  <p className="text-zinc-500 text-sm sm:text-base mb-6">
                     Are you sure you want to order this coffee?
                   </p>
 
@@ -227,6 +228,7 @@ export default function DispensaryPage() {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 }

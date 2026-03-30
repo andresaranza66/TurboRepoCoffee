@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
+import Footer from "@/app/_components/Footer";
 
 function RecentDrinksList() {
   const recentDrinks = useQuery(api.coffee.getRecentDrinks, { limit: 3 });
@@ -62,10 +63,11 @@ export default function Page() {
   if (!isAuthenticated) return null;
 
   return (
-    <main className="min-h-screen bg-amber-50">
-      <Header />
-      <section className="mx-auto max-w-3xl px-4 py-8">
-        <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-black/5 shadow-xl p-6 sm:p-8">
+    <>
+      <main className="min-h-screen bg-amber-50">
+        <Header />
+        <section className="mx-auto max-w-3xl px-4 py-8">
+          <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-black/5 shadow-xl p-6 sm:p-8">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2 className="text-2xl font-bold text-brown-primary">
@@ -165,8 +167,10 @@ export default function Page() {
               </div>
             )}
           </div>
-        </div>
-      </section>
-    </main>
+          </div>
+        </section>
+      </main>
+      <Footer />
+    </>
   );
 }
