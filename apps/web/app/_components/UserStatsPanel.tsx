@@ -2,6 +2,7 @@
 
 import { useApp } from "@/app/providers";
 import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
 
 function formatSubscribedText(subDate: number) {
   const diffMs = Date.now() - subDate;
@@ -18,6 +19,7 @@ export default function UserStatsPanel() {
   const { isLoading, isAuthenticated, name, email, image, drinksCount, subDate } =
     useApp();
   const router = useRouter();
+  const { data: session } = authClient.useSession();
 
   if (!isAuthenticated) return null;
 
@@ -31,7 +33,11 @@ export default function UserStatsPanel() {
       <div className="flex items-center gap-3">
         <button
           type="button"
-          onClick={() => router.push("/getCoffee")}
+          onClick={() =>
+            router.push(
+              session?.user?.id ? `/getCoffee/${session.user.id}` : "/getCoffee",
+            )
+          }
           className="h-20 w-20 rounded-full overflow-hidden bg-white/40 shrink-0 cursor-pointer"
           aria-label="Go to Get Coffee"
         >
