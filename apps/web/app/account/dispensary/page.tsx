@@ -11,6 +11,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client"; // Import auth
 import Footer from "@/app/_components/Footer";
+import { useApp } from "@/app/providers";
 
 type CoffeeType = {
   _id: Id<"coffees">;
@@ -22,6 +23,7 @@ type CoffeeType = {
 };
 
 export default function DispensaryPage() {
+  const { isLoading: isAuthLoading, isAuthenticated } = useApp();
   const [confirmCoffee, setConfirmCoffee] = useState<Id<"coffees"> | null>(
     null,
   );
@@ -45,7 +47,7 @@ export default function DispensaryPage() {
 
   // 2. The Logic: Decide which mutation to run
   const handleOrder = async (coffeeId: Id<"coffees">) => {
-    if (!userId || !drinkStatus) {
+    if (isAuthLoading || !isAuthenticated || !userId || !drinkStatus) {
       toast.error("Debes iniciar sesión para pedir café.");
       return;
     }

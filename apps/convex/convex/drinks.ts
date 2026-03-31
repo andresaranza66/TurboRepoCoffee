@@ -42,7 +42,7 @@ export const canDrinkToday = query({
       .query("orders")
       .filter((q) =>
         q.and(
-          q.eq(q.field("userId"), user._id),
+          q.eq(q.field("userId"), identity.subject),
           q.eq(q.field("type"), "free"),
           q.gte(q.field("createdAt"), today.getTime()),
         ),
@@ -85,7 +85,7 @@ export const consumeFreeDailyDrink = mutation({
       .query("orders")
       .filter((q) =>
         q.and(
-          q.eq(q.field("userId"), user._id),
+          q.eq(q.field("userId"), identity.subject),
           q.eq(q.field("type"), "free"),
           q.gte(q.field("createdAt"), today.getTime()),
         ),
@@ -101,7 +101,7 @@ export const consumeFreeDailyDrink = mutation({
     });
 
     await ctx.db.insert("orders", {
-      userId: user._id,
+      userId: identity.subject,
       coffeeId,
       type: "free",
       createdAt: Date.now(),
@@ -141,7 +141,7 @@ export const buyDrink = mutation({
 
     // ✅ Create order record
     await ctx.db.insert("orders", {
-      userId: user._id,
+      userId: identity.subject,
       coffeeId,
       type: "paid",
       createdAt: Date.now(),
