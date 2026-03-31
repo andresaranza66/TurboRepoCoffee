@@ -12,7 +12,7 @@ import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import Footer from "@/app/_components/Footer";
 
-function RecentDrinksList() {
+function RecentDrinksList({ drinksCount }: { drinksCount: number }) {
   const recentDrinks = useQuery(api.coffee.getRecentDrinks, { limit: 3 });
 
   if (recentDrinks === undefined) {
@@ -28,7 +28,11 @@ function RecentDrinksList() {
           </div>
         ))
       ) : (
-        <div className="text-sm text-zinc-600">No drinks yet</div>
+        <div className="text-sm text-zinc-600">
+          {drinksCount > 0
+            ? "Recent drinks are still syncing"
+            : "No drinks yet"}
+        </div>
       )}
     </div>
   );
@@ -124,7 +128,7 @@ export default function Page() {
                       <div className="text-xs font-medium text-zinc-600">
                         Recent drinks
                       </div>
-                      <RecentDrinksList />
+                      <RecentDrinksList drinksCount={drinksCount} />
                     </div>
                   </div>
                   <Link

@@ -107,6 +107,16 @@ export const consumeFreeDailyDrink = mutation({
       createdAt: Date.now(),
     });
 
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const newCount =
+      user.drinksMonth === currentMonth ? (user.drinksCount ?? 0) + 1 : 1;
+
+    await ctx.db.patch(user._id, {
+      drinksCount: newCount,
+      drinksMonth: currentMonth,
+      updatedAt: Date.now(),
+    });
+
     return true;
   },
 });
@@ -145,6 +155,16 @@ export const buyDrink = mutation({
       coffeeId,
       type: "paid",
       createdAt: Date.now(),
+    });
+
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const newCount =
+      user.drinksMonth === currentMonth ? (user.drinksCount ?? 0) + 1 : 1;
+
+    await ctx.db.patch(user._id, {
+      drinksCount: newCount,
+      drinksMonth: currentMonth,
+      updatedAt: Date.now(),
     });
 
     return true;
