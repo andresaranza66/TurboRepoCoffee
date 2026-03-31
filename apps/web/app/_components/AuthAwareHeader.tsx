@@ -25,7 +25,7 @@ export default function AuthAwareHeader() {
               { label: "Sign up", href: "/signup" },
             ]
       }
-      showUserDropdown={!isLoading}
+      showUserDropdown={true}
     />
   );
 }

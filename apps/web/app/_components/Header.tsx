@@ -58,8 +58,8 @@ function AccountTrigger({
       onMouseEnter={onMouseEnter}
       className={
         isAuthed
-          ? "bg-transparent sm:bg-amber-50 rounded-2xl px-3 py-1.5 flex items-center gap-2 max-w-[220px] hover:cursor-pointer"
-          : "bg-transparent sm:bg-amber-50 rounded-2xl px-4 py-2 text-sm font-semibold text-brown-primary hover:cursor-pointer"
+          ? "bg-transparent sm:bg-amber-100 rounded-2xl px-3 py-1.5 flex items-center gap-2 max-w-[220px] hover:cursor-pointer"
+          : "bg-transparent sm:bg-amber-100 rounded-2xl px-3 py-1.5 flex items-center justify-center sm:justify-start gap-2 text-sm font-semibold text-brown-primary hover:cursor-pointer"
       }
     >
       {isAuthed ? (
@@ -70,7 +70,12 @@ function AccountTrigger({
           </span>
         </>
       ) : (
-        <span>Account</span>
+        <>
+          <span className="sm:hidden">
+            <AvatarCircle userName="Account" userImage={null} />
+          </span>
+          <span className="hidden sm:inline transition-colors">Account</span>
+        </>
       )}
     </button>
   );
@@ -104,6 +109,7 @@ export default function Header({
   const [isDropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const isAuthed = !!(userName || userImage || session?.user?.id);
   const mobileBrandName = brandName.split(" ")[0]?.trim() || brandName;
   const getCoffeeHref = session?.user?.id ? `/getCoffee/${session.user.id}` : "/getCoffee";
   return (
@@ -145,9 +151,11 @@ export default function Header({
             <div
               role="button"
               tabIndex={0}
-              onClick={() => router.push(getCoffeeHref)}
+              onClick={() => router.push(isAuthed ? getCoffeeHref : "/login")}
               onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") router.push(getCoffeeHref);
+                if (e.key === "Enter" || e.key === " ") {
+                  router.push(isAuthed ? getCoffeeHref : "/login");
+                }
               }}
             >
               <AccountTrigger
