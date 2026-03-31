@@ -5,7 +5,7 @@ import Header from "../../_components/Header";
 import { CoffeeIcon } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Link from "next/link";
@@ -40,9 +40,16 @@ function RecentDrinksList({ drinksCount }: { drinksCount: number }) {
 
 export default function Page() {
   const params = useParams<{ userId: string }>();
+  const searchParams = useSearchParams();
   const userId = params.userId;
   const { isLoading, isAuthenticated, coffeeName, drinksCount, subDate } =
     useApp();
+
+  const debugEnabled = searchParams.get("debug") === "1";
+  const debug = useQuery(
+    api.coffee.debugRecentDrinks,
+    debugEnabled ? { scan: 50 } : "skip",
+  );
   const { data: session } = authClient.useSession();
 
   const createSubscription = useMutation(api.user.createSubscription);
@@ -72,24 +79,23 @@ export default function Page() {
         <Header />
         <section className="mx-auto max-w-3xl px-4 py-8">
           <div className="rounded-3xl bg-white/80 backdrop-blur-md border border-black/5 shadow-xl p-6 sm:p-8">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-bold text-brown-primary">
-                Get your coffee
-              </h2>
-              <p className="mt-1 text-sm text-zinc-600">
-                Manage your subscription and track your drinks.
-              </p>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-brown-primary">
+                  Get your coffee
+                </h2>
+                <p className="mt-1 text-sm text-zinc-600">
+                  Manage your subscription and track your drinks.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => router.push("/account")}
+                className="shrink-0 text-sm font-semibold text-brown-primary hover:underline"
+              >
+                My account
+              </button>
             </div>
-
-            <button
-              type="button"
-              onClick={() => router.push("/account")}
-              className="shrink-0 text-sm font-semibold text-brown-primary hover:underline"
-            >
-              My account
-            </button>
-          </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-black/5 bg-white p-4">
@@ -128,7 +134,26 @@ export default function Page() {
                       <div className="text-xs font-medium text-zinc-600">
                         Recent drinks
                       </div>
-                      <RecentDrinksList drinksCount={drinksCount} />
+                      {isAuthenticated ? (
+                        <RecentDrinksList drinksCount={drinksCount} />
+                      ) : (
+                        <div className="mt-2 text-sm text-zinc-600">
+                          Loading...
+                        </div>
+                      )}
+
+                      {debugEnabled ? (
+                        <pre className="mt-3 overflow-x-auto rounded-xl bg-zinc-900 p-3 text-[11px] leading-snug text-zinc-100">
+                          {JSON.stringify(
+                            {
+                              debug,
+                              routeUserId: userId,
+                            },
+                            null,
+                            2,
+                          )}
+                        </pre>
+                      ) : null}
                     </div>
                   </div>
                   <Link
