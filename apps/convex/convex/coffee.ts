@@ -147,7 +147,7 @@ export const debugRecentDrinks = query({
 
       const orders = await ctx.db
         .query("orders")
-        .filter((q) => q.eq(q.field("userId"), identity.subject))
+        .withIndex("by_user", (q) => q.eq("userId", identity.subject))
         .order("desc")
         .take(take);
 
