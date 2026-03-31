@@ -46,10 +46,48 @@ export const ensureUser = mutation({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return;
 
-    const existing = await ctx.db
+    let linked = await ctx.db
       .query("users")
       .withIndex("by_authId", (q) => q.eq("authId", identity.subject))
       .unique();
+
+    if (!linked && identity.email) {
+      linked = await ctx.db
+        .query("users")
+        .withIndex("by_email", (q) => q.eq("email", identity.email!))
+        .unique();
+    }
+
+    if (linked && linked.authId !== identity.subject) {
+      const oldAuthId = linked.authId;
+
+      await ctx.db.patch(linked._id, {
+        authId: identity.subject,
+        updatedAt: Date.now(),
+      });
+
+      let cursor: string | null = null;
+      for (;;) {
+        const page = await ctx.db
+          .query("orders")
+          .withIndex("by_user", (q) => q.eq("userId", oldAuthId))
+          .paginate({
+            cursor,
+            numItems: 100,
+          });
+
+        for (const order of page.page) {
+          await ctx.db.patch(order._id, {
+            userId: identity.subject,
+          });
+        }
+
+        if (page.isDone) break;
+        cursor = page.continueCursor;
+      }
+
+      linked = await ctx.db.get(linked._id);
+    }
 
     let image = (identity as any).image ?? (identity as any).picture ?? undefined;
     let name = (identity as any).name ?? undefined;
@@ -98,17 +136,17 @@ export const ensureUser = mutation({
       if (!image && (betterAuthUser as any)?.image) image = (betterAuthUser as any).image;
     }
 
-    if (existing) {
+    if (linked) {
       const patch: Record<string, any> = { updatedAt: Date.now() };
-      if (identity.email && existing.email !== identity.email) patch.email = identity.email;
-      if (name && existing.name !== name) patch.name = name;
-      if (image && existing.image !== image) patch.image = image;
+      if (identity.email && linked.email !== identity.email) patch.email = identity.email;
+      if (name && linked.name !== name) patch.name = name;
+      if (image && linked.image !== image) patch.image = image;
 
       if (Object.keys(patch).length > 1) {
-        await ctx.db.patch(existing._id, patch);
+        await ctx.db.patch(linked._id, patch);
       }
 
-      return existing._id;
+      return linked._id;
     }
 
     return await ctx.db.insert("users", {
