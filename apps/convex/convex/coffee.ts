@@ -131,32 +131,44 @@ export const getRecentDrinks = query({
 export const debugRecentDrinks = query({
   args: { scan: v.optional(v.number()) },
   handler: async (ctx, { scan }) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) {
+    try {
+      const identity = await ctx.auth.getUserIdentity();
+      if (!identity) {
+        return {
+          hasIdentity: false,
+          subject: null,
+          ordersCount: 0,
+          sampleOrderIds: [],
+          error: null,
+        };
+      }
+
+      const take = Math.max(1, Math.min(scan ?? 50, 200));
+
+      const orders = await ctx.db
+        .query("orders")
+        .filter((q) => q.eq(q.field("userId"), identity.subject))
+        .order("desc")
+        .take(take);
+
+      return {
+        hasIdentity: true,
+        subject: identity.subject,
+        ordersCount: orders.length,
+        sampleOrderIds: orders.slice(0, 5).map((o) => o._id),
+        sampleCoffeeIds: orders.slice(0, 5).map((o) => o.coffeeId),
+        sampleTypes: orders.slice(0, 5).map((o) => o.type),
+        error: null,
+      };
+    } catch (err) {
       return {
         hasIdentity: false,
         subject: null,
         ordersCount: 0,
         sampleOrderIds: [],
+        error: err instanceof Error ? err.message : String(err),
       };
     }
-
-    const take = Math.max(1, Math.min(scan ?? 50, 200));
-
-    const orders = await ctx.db
-      .query("orders")
-      .withIndex("by_user_date", (q) => q.eq("userId", identity.subject))
-      .order("desc")
-      .take(take);
-
-    return {
-      hasIdentity: true,
-      subject: identity.subject,
-      ordersCount: orders.length,
-      sampleOrderIds: orders.slice(0, 5).map((o) => o._id),
-      sampleCoffeeIds: orders.slice(0, 5).map((o) => o.coffeeId),
-      sampleTypes: orders.slice(0, 5).map((o) => o.type),
-    };
   },
 });
 
